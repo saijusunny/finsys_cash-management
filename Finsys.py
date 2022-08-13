@@ -2019,78 +2019,42 @@ def main_sign_in():
 
                     rth2 = cash_can.create_polygon(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, fill="#213b52",tags=("bg_pol_graph"),smooth=True,)
 
+                    sql_sale="select paymdate,payment from app1_payment where cid_id=%s and pmethod='Cash'"
+                    sql_sale_val=(dtl_cmp_pro[0],)
+                    fbcursor.execute(sql_sale,sql_sale_val,)
+                    sales_graph=fbcursor.fetchall()
+
                     def chart_tp_slt(event):
                         figfirst = plt.figure(figsize=(12, 6), dpi=105)
                         if chrt_tp.get()=="Bar":
 
-                            # for item in can_sals.get_tk_widget().find_all():
-        
-                            #     can_sals.get_tk_widget().delete(item)
-                            y=100
-
-                            x="axis_x"
+                            x= []
+                            y= []
+                            for i in sales_graph:
+                                x.append(i[0])
+                            for j in sales_graph:
+                                y.append(j[1])
                             
-                            plt.bar(x,y, label="Invoice", color="orange")
+                            plt.bar(x,y, label="Invoice", color="gray")
                             plt.legend()
                             plt.xlabel("Total Amount")
                             plt.ylabel("Date")
                             axes=plt.gca()
                             axes.yaxis.grid()
 
-                            y=500
-                            x="dates"
-                            plt.bar(x,y, label="Outstanding", color="blue")
-                            plt.legend()
-                            plt.xlabel("Total Amount")
-                            plt.ylabel("Date")
-                            axes=plt.gca()
-                            axes.yaxis.grid()
-                    
-
-                            y=200
-                            x="dates3"
-                            plt.bar(x,y, label="Paid", color="green") 
-                            plt.legend()
-                            plt.xlabel("Total Amount")
-                            plt.ylabel("Date")
-                            axes=plt.gca()
-                            axes.yaxis.grid()
-                            
-
-                            y=700
-                            x="dates5"
-                            plt.bar(x,y, label="Paid", color="red") 
-                            plt.legend()
-                            plt.xlabel("Total Amount")
-                            plt.ylabel("Date")
-                            axes=plt.gca()
-                            axes.yaxis.grid()
-
-                            y=700
-                            x="dates6"
-                            plt.bar(x,y, label="Paid", color="gray") 
-                            plt.legend()
-                            plt.xlabel("Total Amount")
-                            plt.ylabel("Date")
-                            axes=plt.gca()
-                            axes.yaxis.grid()
-
-                            y=700
-                            x="dates7"
-                            plt.bar(x,y, label="Paid", color="black") 
-                            plt.legend()
-                            plt.xlabel("Total Amount")
-                            plt.ylabel("Date")
-                            axes=plt.gca()
-                            axes.yaxis.grid()
                             figfirst.set_facecolor("#213b52")
                             axes.set_facecolor("#213b52")
                             
                             
                             
                         elif chrt_tp.get()=="Pie":
-                            labels = 'Frogs', 'Hogs', 'Dogs', 'Logs'
-                            sizes = [15, 30, 45, 10]
+                            
+                            labels= []
+                            sizes= []
+                            for i in sales_graph:
+                                labels.append(i[0])
+                            for j in sales_graph:
+                                sizes.append(j[1])
                             figfirst, ax1 = plt.subplots(figsize=(12, 6), dpi=105)
                             patches, texts, autotexts =ax1.pie(sizes, autopct='%1.1f%%',labels=labels,
                             shadow=True, startangle=90)
@@ -2100,8 +2064,13 @@ def main_sign_in():
                             
                         elif chrt_tp.get()=="Line":
                             
-                            x = [1,2,3,4,5]
-                            y = [1,10,5,20,15]
+                            
+                            x= []
+                            y= []
+                            for i in sales_graph:
+                                x.append(i[0])
+                            for j in sales_graph:
+                                y.append(j[1])
                             
                             
                             labels = x
@@ -2119,8 +2088,29 @@ def main_sign_in():
                             figfirst, ax = plt.subplots(figsize=(12, 6), dpi=105)
 
                             size = 0.3
-                            labels=['sleeping','working','dreaming']
-                            vals = np.array([[60., 32.], [37., 40.], [29., 10.]])
+                            labels = []
+                            for i in sales_graph:
+                                    labels.append(i[0])
+                            
+                            size = 0.3
+                            
+                            sql_sale_ch="select payment from app1_payment where cid_id=%s and pmethod='Cash'"
+                            sql_sale_ch_val=(dtl_cmp_pro[0],)
+                            fbcursor.execute(sql_sale_ch,sql_sale_ch_val,)
+                            sales_graph_cgr=fbcursor.fetchall()
+
+                            arr = np.asarray(sales_graph_cgr)
+                            
+                            vals = np.array(arr)
+                            print(vals)
+                            print(labels)
+                            # labels=['sleeping','working','dreaming','dreaming','dreaming','dreaming']
+                            vals = np.array([[6000],
+                                [250],
+                                [5000],
+                                [1200],
+                                [1400],
+                                [1568]])
                     
                             cmap = plt.colormaps["tab20c"]
                             outer_colors = cmap(np.arange(3)*4)
@@ -2134,10 +2124,18 @@ def main_sign_in():
                             figfirst.set_facecolor("#213b52")
                             ax.set_facecolor("#92a1ae")
                         elif chrt_tp.get()=="Bubble":
+                            x= []
+                            y= []
+                            for i in sales_graph:
+                                x.append(i[0])
+                            for j in sales_graph:
+                                y.append(int(j[1]))
+                            
+
                             browser_market_share = {
-                                'browsers': ['firefox', 'chrome', 'safari', 'edge', 'ie', 'opera','firefox', 'chrome', 'safari', 'edge', 'ie', 'opera'],
-                                'market_share': [8.61, 69.55, 8.36, 4.12, 2.76, 2.43,8.61, 69.55, 8.36, 4.12, 2.76, 2.43],
-                                'color': ['#5A69AF', '#579E65', '#F9C784', '#FC944A', '#F24C00', '#00B825','#5A69AF', '#579E65', '#F9C784', '#FC944A', '#F24C00', '#00B825']
+                                'browsers': x,
+                                'market_share': y,
+                                'color': ['#5A69AF', '#579E65', '#F9C784', '#FC944A','#FC944A','#FC944A']
                             }
 
 
@@ -2348,63 +2346,23 @@ def main_sign_in():
                     win_inv1 = cash_can.create_window(0, 0, anchor="nw", window=chrt_type, tag=("chrt_type"))
 
                     #----------------------------------------------------------------------graph section
-                    y=100
-
-                    x="axis_x"
-                    figfirst = plt.figure(figsize=(12, 6), dpi=105)
-                    plt.bar(x,y, label="Invoice", color="orange")
-                    plt.legend()
-                    plt.xlabel("Total Amount")
-                    plt.ylabel("Date")
-                    axes=plt.gca()
-                    axes.yaxis.grid()
-
-                    y=500
-                    x="dates"
-                    plt.bar(x,y, label="Outstanding", color="blue")
-                    plt.legend()
-                    plt.xlabel("Total Amount")
-                    plt.ylabel("Date")
-                    axes=plt.gca()
-                    axes.yaxis.grid()
-               
-
-                    y=200
-                    x="dates3"
-                    plt.bar(x,y, label="Paid", color="green") 
-                    plt.legend()
-                    plt.xlabel("Total Amount")
-                    plt.ylabel("Date")
-                    axes=plt.gca()
-                    axes.yaxis.grid()
+                    x= []
+                    y= []
+                    for i in sales_graph:
+                       x.append(i[0])
+                    for j in sales_graph:
+                        y.append(j[1])
                     
-
-                    y=700
-                    x="dates5"
-                    plt.bar(x,y, label="Paid", color="red") 
+                    
+                    figfirst = plt.figure(figsize=(12, 6), dpi=105)
+                    plt.bar(x,y, label="Payment", color="gray")
                     plt.legend()
-                    plt.xlabel("Total Amount")
-                    plt.ylabel("Date")
+                    plt.xlabel("Date")
+                    plt.ylabel("Payment Amount")
                     axes=plt.gca()
                     axes.yaxis.grid()
 
-                    y=700
-                    x="dates6"
-                    plt.bar(x,y, label="Paid", color="gray") 
-                    plt.legend()
-                    plt.xlabel("Total Amount")
-                    plt.ylabel("Date")
-                    axes=plt.gca()
-                    axes.yaxis.grid()
-
-                    y=700
-                    x="dates7"
-                    plt.bar(x,y, label="Paid", color="white") 
-                    plt.legend()
-                    plt.xlabel("Total Amount")
-                    plt.ylabel("Date")
-                    axes=plt.gca()
-                    axes.yaxis.grid()
+                    
                     figfirst.set_facecolor("#213b52")
                     axes.set_facecolor("#213b52")
                     
