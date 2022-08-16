@@ -1488,6 +1488,7 @@ def main_sign_in():
                         arr = np.asarray(exp_typ)
                         vals = np.array(arr)
                         
+                        
                     
                         cmap = plt.colormaps["tab20c"]
                         outer_colors = cmap(np.arange(3)*4)
@@ -2019,23 +2020,37 @@ def main_sign_in():
 
                     rth2 = cash_can.create_polygon(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, fill="#213b52",tags=("bg_pol_graph"),smooth=True,)
 
-                    sql_sale="select paymdate,payment from app1_payment where cid_id=%s and pmethod='Cash'"
+                    sql_sale="select paymdate from app1_payment where cid_id=%s and pmethod='Cash'"
                     sql_sale_val=(dtl_cmp_pro[0],)
                     fbcursor.execute(sql_sale,sql_sale_val,)
                     sales_graph=fbcursor.fetchall()
+                    sal_date=[]
+                    sal_pymt=[]
+                    for i in sales_graph:
+                            sal_date.append(i[0])
+                    
+                            sql_pros="select sum(payment) from app1_payment where cid_id=%s and paymdate=%s and pmethod='Cash'"
+                            sql_pros_val=(dtl_cmp_pro[0],i[0],)
+                            fbcursor.execute(sql_pros,sql_pros_val,)
+                            sal_totl_invs=fbcursor.fetchone()
+                            
+                            sal_pymt.insert(-1,sal_totl_invs[0])
+                   
 
                     def chart_tp_slt(event):
                         figfirst = plt.figure(figsize=(12, 6), dpi=105)
                         if chrt_tp.get()=="Bar":
-
-                            x= []
-                            y= []
-                            for i in sales_graph:
-                                x.append(i[0])
-                            for j in sales_graph:
-                                y.append(j[1])
+                            try:
+                                x= sal_date
+                                y= sal_pymt
                             
-                            plt.bar(x,y, label="Invoice", color="gray")
+                            except:
+                                x=['0']
+                                y=[0]
+                                
+                            plt.bar(x,y, label="Payment Amount", color="gray")
+                            
+
                             plt.legend()
                             plt.xlabel("Total Amount")
                             plt.ylabel("Date")
@@ -2048,13 +2063,13 @@ def main_sign_in():
                             
                             
                         elif chrt_tp.get()=="Pie":
-                            
-                            labels= []
-                            sizes= []
-                            for i in sales_graph:
-                                labels.append(i[0])
-                            for j in sales_graph:
-                                sizes.append(j[1])
+                            try:
+                                labels= sal_date
+                                sizes= sal_pymt
+                            except:
+                                labels=['0']
+                                sizes=[100]
+                           
                             figfirst, ax1 = plt.subplots(figsize=(12, 6), dpi=105)
                             patches, texts, autotexts =ax1.pie(sizes, autopct='%1.1f%%',labels=labels,
                             shadow=True, startangle=90)
@@ -2064,13 +2079,12 @@ def main_sign_in():
                             
                         elif chrt_tp.get()=="Line":
                             
-                            
-                            x= []
-                            y= []
-                            for i in sales_graph:
-                                x.append(i[0])
-                            for j in sales_graph:
-                                y.append(j[1])
+                            try:
+                                x= sal_date
+                                y= sal_pymt
+                            except:
+                                x=['0']
+                                y=[0]
                             
                             
                             labels = x
@@ -2088,207 +2102,215 @@ def main_sign_in():
                             figfirst, ax = plt.subplots(figsize=(12, 6), dpi=105)
 
                             size = 0.3
-                            labels = []
-                            for i in sales_graph:
-                                    labels.append(i[0])
+                            
+                            
                             
                             size = 0.3
+                            try:
+                                vals=[]
+                                sal_pymts= []
+                                labels = sal_date
+                                for i in sales_graph:
+                                    
+                                    sql_pros="select sum(payment) from app1_payment where cid_id=%s and paymdate=%s and pmethod='Cash'"
+                                    sql_pros_val=(dtl_cmp_pro[0],i[0],)
+                                    fbcursor.execute(sql_pros,sql_pros_val,)
+                                    sal_totl_invs=fbcursor.fetchone()
+                                    arr = np.asarray(sal_totl_invs)
+                                    vals2s = np.array(arr)
+                                    sal_pymts.insert(-1,list(vals2s))
                             
-                            sql_sale_ch="select payment from app1_payment where cid_id=%s and pmethod='Cash'"
-                            sql_sale_ch_val=(dtl_cmp_pro[0],)
-                            fbcursor.execute(sql_sale_ch,sql_sale_ch_val,)
-                            sales_graph_cgr=fbcursor.fetchall()
 
-                            arr = np.asarray(sales_graph_cgr)
+                                vals = np.array(sal_pymts)
                             
-                            vals = np.array(arr)
-                            print(vals)
-                            print(labels)
-                            # labels=['sleeping','working','dreaming','dreaming','dreaming','dreaming']
-                            vals = np.array([[6000],
-                                [250],
-                                [5000],
-                                [1200],
-                                [1400],
-                                [1568]])
-                    
-                            cmap = plt.colormaps["tab20c"]
-                            outer_colors = cmap(np.arange(3)*4)
                             
-                        
+                                cmap = plt.colormaps["tab20c"]
+                                outer_colors = cmap(np.arange(3)*4)
+                                
+                            
 
-                            ax.pie(vals.sum(axis=1), radius=1, colors=outer_colors,labels=labels, wedgeprops=dict(width=size, edgecolor='w'))
+                                ax.pie(vals.sum(axis=1), radius=1, colors=outer_colors,labels=labels, wedgeprops=dict(width=size, edgecolor='w'))
 
-                            ax.set(aspect="equal", title='Cost Of Sales')
-                        
-                            figfirst.set_facecolor("#213b52")
-                            ax.set_facecolor("#92a1ae")
+                                ax.set(aspect="equal", title='')
+                            
+                                figfirst.set_facecolor("#213b52")
+                                ax.set_facecolor("#92a1ae")
+                            except:
+                                figfirst.set_facecolor("#213b52")
+                                pass
                         elif chrt_tp.get()=="Bubble":
-                            x= []
-                            y= []
-                            for i in sales_graph:
-                                x.append(i[0])
-                            for j in sales_graph:
-                                y.append(int(j[1]))
-                            
-
-                            browser_market_share = {
+                            try:
+                                x= sal_date
+                                y= sal_pymt
+                               
+                                z=[]
+                                lj='gray'
+                                
+                                for i in range(len(y)):
+                                    z.insert(-1,lj)
+                                
+                                
+                                    
+                                browser_market_share = {
                                 'browsers': x,
                                 'market_share': y,
-                                'color': ['#5A69AF', '#579E65', '#F9C784', '#FC944A','#FC944A','#FC944A']
-                            }
+                                'color': z
+                                }
+                            
+                               
 
 
-                            class BubbleChart:
-                                def __init__(self, area, bubble_spacing=0):
-                                    """
-                                    Setup for bubble collapse.
+                                class BubbleChart:
+                                    def __init__(self, area, bubble_spacing=0):
+                                        """
+                                        Setup for bubble collapse.
 
-                                    Parameters
-                                    ----------
-                                    area : array-like
-                                        Area of the bubbles.
-                                    bubble_spacing : float, default: 0
-                                        Minimal spacing between bubbles after collapsing.
+                                        Parameters
+                                        ----------
+                                        area : array-like
+                                            Area of the bubbles.
+                                        bubble_spacing : float, default: 0
+                                            Minimal spacing between bubbles after collapsing.
 
-                                    Notes
-                                    -----
-                                    If "area" is sorted, the results might look weird.
-                                    """
-                                    area = np.asarray(area)
-                                    r = np.sqrt(area / np.pi)
+                                        Notes
+                                        -----
+                                        If "area" is sorted, the results might look weird.
+                                        """
+                                        area = np.asarray(area)
+                                        r = np.sqrt(area / np.pi)
 
-                                    self.bubble_spacing = bubble_spacing
-                                    self.bubbles = np.ones((len(area), 4))
-                                    self.bubbles[:, 2] = r
-                                    self.bubbles[:, 3] = area
-                                    self.maxstep = 2 * self.bubbles[:, 2].max() + self.bubble_spacing
-                                    self.step_dist = self.maxstep / 2
+                                        self.bubble_spacing = bubble_spacing
+                                        self.bubbles = np.ones((len(area), 4))
+                                        self.bubbles[:, 2] = r
+                                        self.bubbles[:, 3] = area
+                                        self.maxstep = 2 * self.bubbles[:, 2].max() + self.bubble_spacing
+                                        self.step_dist = self.maxstep / 2
 
-                                    # calculate initial grid layout for bubbles
-                                    length = np.ceil(np.sqrt(len(self.bubbles)))
-                                    grid = np.arange(length) * self.maxstep
-                                    gx, gy = np.meshgrid(grid, grid)
-                                    self.bubbles[:, 0] = gx.flatten()[:len(self.bubbles)]
-                                    self.bubbles[:, 1] = gy.flatten()[:len(self.bubbles)]
+                                        # calculate initial grid layout for bubbles
+                                        length = np.ceil(np.sqrt(len(self.bubbles)))
+                                        grid = np.arange(length) * self.maxstep
+                                        gx, gy = np.meshgrid(grid, grid)
+                                        self.bubbles[:, 0] = gx.flatten()[:len(self.bubbles)]
+                                        self.bubbles[:, 1] = gy.flatten()[:len(self.bubbles)]
 
-                                    self.com = self.center_of_mass()
+                                        self.com = self.center_of_mass()
 
-                                def center_of_mass(self):
-                                    return np.average(
-                                        self.bubbles[:, :2], axis=0, weights=self.bubbles[:, 3]
-                                    )
+                                    def center_of_mass(self):
+                                        return np.average(
+                                            self.bubbles[:, :2], axis=0, weights=self.bubbles[:, 3]
+                                        )
 
-                                def center_distance(self, bubble, bubbles):
-                                    return np.hypot(bubble[0] - bubbles[:, 0],
-                                                    bubble[1] - bubbles[:, 1])
+                                    def center_distance(self, bubble, bubbles):
+                                        return np.hypot(bubble[0] - bubbles[:, 0],
+                                                        bubble[1] - bubbles[:, 1])
 
-                                def outline_distance(self, bubble, bubbles):
-                                    center_distance = self.center_distance(bubble, bubbles)
-                                    return center_distance - bubble[2] - \
-                                        bubbles[:, 2] - self.bubble_spacing
+                                    def outline_distance(self, bubble, bubbles):
+                                        center_distance = self.center_distance(bubble, bubbles)
+                                        return center_distance - bubble[2] - \
+                                            bubbles[:, 2] - self.bubble_spacing
 
-                                def check_collisions(self, bubble, bubbles):
-                                    distance = self.outline_distance(bubble, bubbles)
-                                    return len(distance[distance < 0])
+                                    def check_collisions(self, bubble, bubbles):
+                                        distance = self.outline_distance(bubble, bubbles)
+                                        return len(distance[distance < 0])
 
-                                def collides_with(self, bubble, bubbles):
-                                    distance = self.outline_distance(bubble, bubbles)
-                                    idx_min = np.argmin(distance)
-                                    return idx_min if type(idx_min) == np.ndarray else [idx_min]
+                                    def collides_with(self, bubble, bubbles):
+                                        distance = self.outline_distance(bubble, bubbles)
+                                        idx_min = np.argmin(distance)
+                                        return idx_min if type(idx_min) == np.ndarray else [idx_min]
 
-                                def collapse(self, n_iterations=50):
-                                    """
-                                    Move bubbles to the center of mass.
+                                    def collapse(self, n_iterations=50):
+                                        """
+                                        Move bubbles to the center of mass.
 
-                                    Parameters
-                                    ----------
-                                    n_iterations : int, default: 50
-                                        Number of moves to perform.
-                                    """
-                                    for _i in range(n_iterations):
-                                        moves = 0
+                                        Parameters
+                                        ----------
+                                        n_iterations : int, default: 50
+                                            Number of moves to perform.
+                                        """
+                                        for _i in range(n_iterations):
+                                            moves = 0
+                                            for i in range(len(self.bubbles)):
+                                                rest_bub = np.delete(self.bubbles, i, 0)
+                                                # try to move directly towards the center of mass
+                                                # direction vector from bubble to the center of mass
+                                                dir_vec = self.com - self.bubbles[i, :2]
+
+                                                # shorten direction vector to have length of 1
+                                                dir_vec = dir_vec / np.sqrt(dir_vec.dot(dir_vec))
+
+                                                # calculate new bubble position
+                                                new_point = self.bubbles[i, :2] + dir_vec * self.step_dist
+                                                new_bubble = np.append(new_point, self.bubbles[i, 2:4])
+
+                                                # check whether new bubble collides with other bubbles
+                                                if not self.check_collisions(new_bubble, rest_bub):
+                                                    self.bubbles[i, :] = new_bubble
+                                                    self.com = self.center_of_mass()
+                                                    moves += 1
+                                                else:
+                                                    # try to move around a bubble that you collide with
+                                                    # find colliding bubble
+                                                    for colliding in self.collides_with(new_bubble, rest_bub):
+                                                        # calculate direction vector
+                                                        dir_vec = rest_bub[colliding, :2] - self.bubbles[i, :2]
+                                                        dir_vec = dir_vec / np.sqrt(dir_vec.dot(dir_vec))
+                                                        # calculate orthogonal vector
+                                                        orth = np.array([dir_vec[1], -dir_vec[0]])
+                                                        # test which direction to go
+                                                        new_point1 = (self.bubbles[i, :2] + orth *
+                                                                    self.step_dist)
+                                                        new_point2 = (self.bubbles[i, :2] - orth *
+                                                                    self.step_dist)
+                                                        dist1 = self.center_distance(
+                                                            self.com, np.array([new_point1]))
+                                                        dist2 = self.center_distance(
+                                                            self.com, np.array([new_point2]))
+                                                        new_point = new_point1 if dist1 < dist2 else new_point2
+                                                        new_bubble = np.append(new_point, self.bubbles[i, 2:4])
+                                                        if not self.check_collisions(new_bubble, rest_bub):
+                                                            self.bubbles[i, :] = new_bubble
+                                                            self.com = self.center_of_mass()
+
+                                            if moves / len(self.bubbles) < 0.1:
+                                                self.step_dist = self.step_dist / 2
+
+                                    def plot(self, ax, labels, colors):
+                                        """
+                                        Draw the bubble plot.
+
+                                        Parameters
+                                        ----------
+                                        ax : matplotlib.axes.Axes
+                                        labels : list
+                                            Labels of the bubbles.
+                                        colors : list
+                                            Colors of the bubbles.
+                                        """
                                         for i in range(len(self.bubbles)):
-                                            rest_bub = np.delete(self.bubbles, i, 0)
-                                            # try to move directly towards the center of mass
-                                            # direction vector from bubble to the center of mass
-                                            dir_vec = self.com - self.bubbles[i, :2]
-
-                                            # shorten direction vector to have length of 1
-                                            dir_vec = dir_vec / np.sqrt(dir_vec.dot(dir_vec))
-
-                                            # calculate new bubble position
-                                            new_point = self.bubbles[i, :2] + dir_vec * self.step_dist
-                                            new_bubble = np.append(new_point, self.bubbles[i, 2:4])
-
-                                            # check whether new bubble collides with other bubbles
-                                            if not self.check_collisions(new_bubble, rest_bub):
-                                                self.bubbles[i, :] = new_bubble
-                                                self.com = self.center_of_mass()
-                                                moves += 1
-                                            else:
-                                                # try to move around a bubble that you collide with
-                                                # find colliding bubble
-                                                for colliding in self.collides_with(new_bubble, rest_bub):
-                                                    # calculate direction vector
-                                                    dir_vec = rest_bub[colliding, :2] - self.bubbles[i, :2]
-                                                    dir_vec = dir_vec / np.sqrt(dir_vec.dot(dir_vec))
-                                                    # calculate orthogonal vector
-                                                    orth = np.array([dir_vec[1], -dir_vec[0]])
-                                                    # test which direction to go
-                                                    new_point1 = (self.bubbles[i, :2] + orth *
-                                                                self.step_dist)
-                                                    new_point2 = (self.bubbles[i, :2] - orth *
-                                                                self.step_dist)
-                                                    dist1 = self.center_distance(
-                                                        self.com, np.array([new_point1]))
-                                                    dist2 = self.center_distance(
-                                                        self.com, np.array([new_point2]))
-                                                    new_point = new_point1 if dist1 < dist2 else new_point2
-                                                    new_bubble = np.append(new_point, self.bubbles[i, 2:4])
-                                                    if not self.check_collisions(new_bubble, rest_bub):
-                                                        self.bubbles[i, :] = new_bubble
-                                                        self.com = self.center_of_mass()
-
-                                        if moves / len(self.bubbles) < 0.1:
-                                            self.step_dist = self.step_dist / 2
-
-                                def plot(self, ax, labels, colors):
-                                    """
-                                    Draw the bubble plot.
-
-                                    Parameters
-                                    ----------
-                                    ax : matplotlib.axes.Axes
-                                    labels : list
-                                        Labels of the bubbles.
-                                    colors : list
-                                        Colors of the bubbles.
-                                    """
-                                    for i in range(len(self.bubbles)):
-                                        circ = plt.Circle(
-                                            self.bubbles[i, :2], self.bubbles[i, 2], color=colors[i])
-                                        ax.add_patch(circ)
-                                        ax.text(*self.bubbles[i, :2], labels[i],
-                                                horizontalalignment='center', verticalalignment='center')
+                                            circ = plt.Circle(
+                                                self.bubbles[i, :2], self.bubbles[i, 2], color=colors[i])
+                                            ax.add_patch(circ)
+                                            ax.text(*self.bubbles[i, :2], labels[i],
+                                                    horizontalalignment='center', verticalalignment='center')
 
 
-                            bubble_chart = BubbleChart(area=browser_market_share['market_share'],
-                                                    bubble_spacing=0.1)
+                                bubble_chart = BubbleChart(area=browser_market_share['market_share'],
+                                                        bubble_spacing=0.1)
 
-                            bubble_chart.collapse()
+                                bubble_chart.collapse()
 
-                            figfirst, ax = plt.subplots(subplot_kw=dict(aspect="equal"),figsize=(12, 6), dpi=105)
-                            bubble_chart.plot(
-                                ax, browser_market_share['browsers'], browser_market_share['color'])
-                            ax.axis("off")
-                            ax.relim()
-                            ax.autoscale_view()
-                            ax.set_title('Browser market share')
-                            figfirst.set_facecolor("#213b52")
-                            ax.set_facecolor("#92a1ae")
-                       
-                            pass
+                                figfirst, ax = plt.subplots(subplot_kw=dict(aspect="equal"),figsize=(12, 6), dpi=105)
+                                bubble_chart.plot(
+                                    ax, browser_market_share['browsers'], browser_market_share['color'])
+                                ax.axis("off")
+                                ax.relim()
+                                ax.autoscale_view()
+                                ax.set_title('')
+                                figfirst.set_facecolor("#213b52")
+                                ax.set_facecolor("#92a1ae")
+                            except:
+                                figfirst.set_facecolor("#213b52")
+                                pass
                         can_sals2= FigureCanvasTkAgg(figfirst, master=cash_can)
                         can_sals2.draw()
                         can_sals2.get_tk_widget()
@@ -2309,10 +2331,7 @@ def main_sign_in():
                             cmp_name.config(text="Today: ₹"+str(valu_cr)+" INR")
                         
                             pass
-                        elif crcy_tps.get()=="¥ YEN":
-                            cmp_name.config(text="Today: ¥3556345 YEN")
-                  
-                            pass
+                        
                         elif crcy_tps.get()=="€ EUR":
                             valu_cr=c.get_rate( 'INR','EUR', dt)
                             cmp_name.config(text="Today: €"+str(valu_cr)+" EUR")
@@ -2331,7 +2350,7 @@ def main_sign_in():
 
                     crcy_tps= StringVar()
                     crcy_cmp = ttk.Combobox(cash_can,textvariable=crcy_tps,width=15,font=('Calibri 16'))
-                    crcy_cmp['values'] = ('$ USD', '₹ INR', '¥ YEN','€ EUR')
+                    crcy_cmp['values'] = ('$ USD', '₹ INR','€ EUR')
                     crcy_cmp.bind('<<ComboboxSelected>>', crcy_typ)
                     crcy_cmp.current(0)
                     win_inv1 = cash_can.create_window(0, 0, anchor="nw", window=crcy_cmp, tag=("crcy_cmp"))
@@ -2346,16 +2365,16 @@ def main_sign_in():
                     win_inv1 = cash_can.create_window(0, 0, anchor="nw", window=chrt_type, tag=("chrt_type"))
 
                     #----------------------------------------------------------------------graph section
-                    x= []
-                    y= []
-                    for i in sales_graph:
-                       x.append(i[0])
-                    for j in sales_graph:
-                        y.append(j[1])
+                    try:
+                        x= sal_date
+                        y= sal_pymt
+                    except:
+                        x='0'
+                        y=0
                     
                     
                     figfirst = plt.figure(figsize=(12, 6), dpi=105)
-                    plt.bar(x,y, label="Payment", color="gray")
+                    plt.bar(x,y, label="Payment Amount", color="gray")
                     plt.legend()
                     plt.xlabel("Date")
                     plt.ylabel("Payment Amount")
